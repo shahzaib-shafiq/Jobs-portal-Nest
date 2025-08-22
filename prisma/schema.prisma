@@ -1,0 +1,138 @@
+// -------------------------
+// Datasource & Generator
+// -------------------------
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -------------------------
+// Models
+// -------------------------
+model User {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName     String        @db.VarChar(100)
+  lastName      String        @db.VarChar(100)
+  email         String        @unique @db.VarChar(150)
+  password      String        @db.VarChar(255)
+  role          Role
+  profileSummary String?      
+  resumeUrl     String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  companies     Company[]     @relation("CompanyCreatedBy")
+  jobs          Job[]         @relation("JobCreatedBy")
+  applications  Application[]
+  savedJobs     SavedJob[]
+  notifications Notification[]
+}
+
+model Company {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String   @db.VarChar(150)
+  description String?
+  industry    String?
+  website     String?
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // ✅ FK must match User.id (UUID)
+  createdById String?  @db.Uuid
+  createdBy   User?    @relation("CompanyCreatedBy", fields: [createdById], references: [id])
+
+  jobs        Job[]
+}
+
+model Job {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  description String
+  location    String?
+  jobType     JobType
+  salary      Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // ✅ FK must match User.id (UUID)
+  createdById String?  @db.Uuid
+  createdBy   User?    @relation("JobCreatedBy", fields: [createdById], references: [id])
+
+  // ✅ FK must match Company.id (UUID)
+  companyId   String?  @db.Uuid
+  company     Company? @relation(fields: [companyId], references: [id])
+
+  applications Application[]
+  savedJobs    SavedJob[]
+}
+
+model Application {
+  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status      ApplicationStatus  @default(PENDING)
+  coverLetter String?
+  resumeUrl   String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  // ✅ FK must match Job.id (UUID)
+  jobId String @db.Uuid
+  job   Job    @relation(fields: [jobId], references: [id])
+
+  // ✅ FK must match User.id (UUID)
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model SavedJob {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now())
+
+  // ✅ FK must match User.id (UUID)
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+
+  // ✅ FK must match Job.id (UUID)
+  jobId String @db.Uuid
+  job   Job    @relation(fields: [jobId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // ✅ FK must match User.id (UUID)
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+// -------------------------
+// Enums
+// -------------------------
+enum Role {
+  job_seeker
+  recruiter
+  admin
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+  REMOTE
+}
+
+enum ApplicationStatus {
+  PENDING
+  SHORTLISTED
+  REJECTED
+  HIRED
+}
