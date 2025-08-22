@@ -6,7 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService,private jwtService: JwtService,) {}
+  constructor(private prisma: PrismaService,private jwtService: JwtService) {}
 
 async create(createAuthDto: CreateAuthDto) {
   // generate salt + hash password
