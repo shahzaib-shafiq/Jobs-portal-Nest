@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "public"."Role" AS ENUM ('job_seeker', 'recruiter', 'admin');
+CREATE TYPE "public"."Role" AS ENUM ('candidate', 'recruiter', 'admin');
 
 -- CreateEnum
 CREATE TYPE "public"."JobType" AS ENUM ('FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERN', 'REMOTE');

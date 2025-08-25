@@ -117,7 +117,7 @@ model Notification {
 // Enums
 // -------------------------
 enum Role {
-  job_seeker
+  candidate
   recruiter
   admin
 }
