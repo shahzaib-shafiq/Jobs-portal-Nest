@@ -19,16 +19,16 @@ export class ApplicationController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.applicationService.findOne(+id);
+    return this.applicationService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateApplicationDto: UpdateApplicationDto) {
-    return this.applicationService.update(+id, updateApplicationDto);
+    return this.applicationService.update(id, updateApplicationDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.applicationService.remove(+id);
+    return this.applicationService.remove(id);
   }
 }
