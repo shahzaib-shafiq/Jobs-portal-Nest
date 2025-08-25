@@ -16,6 +16,10 @@ export class SavedJobController {
   findAll() {
     return this.savedJobService.findAll();
   }
+   @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.savedJobService.findOne(id);
+  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
