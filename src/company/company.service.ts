@@ -1,26 +1,53 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 
 @Injectable()
 export class CompanyService {
-  create(createCompanyDto: CreateCompanyDto) {
-    return 'This action adds a new company';
+  constructor(private prisma: PrismaService) {}
+
+  async create(createCompanyDto: CreateCompanyDto) {
+    return this.prisma.company.create({
+      data: createCompanyDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all company`;
+  async findAll() {
+    return this.prisma.company.findMany({
+      include: {
+        createdBy: true, // optional: include user who created the company
+        jobs: true,      // optional: include related jobs
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} company`;
+  async findOne(id: string) {
+    const company = await this.prisma.company.findUnique({
+      where: { id },
+      include: {
+        createdBy: true,
+        jobs: true,
+      },
+    });
+
+    if (!company) {
+      throw new NotFoundException(`Company with ID ${id} not found`);
+    }
+
+    return company;
   }
 
-  update(id: number, updateCompanyDto: UpdateCompanyDto) {
-    return `This action updates a #${id} company`;
+  async update(id: string, updateCompanyDto: UpdateCompanyDto) {
+    return this.prisma.company.update({
+      where: { id },
+      data: updateCompanyDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} company`;
+  async remove(id: string) {
+    return this.prisma.company.delete({
+      where: { id },
+    });
   }
 }
