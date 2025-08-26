@@ -3,7 +3,7 @@ import { SavedJobService } from './saved-job.service';
 import { CreateSavedJobDto } from './dto/create-saved-job.dto';
 import { UpdateSavedJobDto } from './dto/update-saved-job.dto';
 
-@Controller('saved-job')
+@Controller('savejob')
 export class SavedJobController {
   constructor(private readonly savedJobService: SavedJobService) {}
 
@@ -16,19 +16,13 @@ export class SavedJobController {
   findAll() {
     return this.savedJobService.findAll();
   }
-
-  @Get(':id')
+   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.savedJobService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSavedJobDto: UpdateSavedJobDto) {
-    return this.savedJobService.update(+id, updateSavedJobDto);
+    return this.savedJobService.findOne(id);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.savedJobService.remove(+id);
+    return this.savedJobService.remove(id);
   }
 }
