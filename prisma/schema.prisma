@@ -48,7 +48,7 @@ model Company {
   logoUrl     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
+    isDeleted     Boolean  @default(false)
   // ✅ FK must match User.id (UUID)
   createdById String?  @db.Uuid
   createdBy   User?    @relation("CompanyCreatedBy", fields: [createdById], references: [id])
@@ -68,7 +68,7 @@ model Job {
   skills      String[] 
   year        Int?
   budget      Float?
-
+    isDeleted     Boolean  @default(false)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -92,6 +92,15 @@ model Application {
   resumeUrl   String?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
+  type        String?
+  jobSource   String?
+  currentStatus String?
+  score         Float? 
+  comments      String?
+  gpa            Float?
+  skillSummary  String?
+  onHold        Boolean  @default(false)
+  isDeleted     Boolean  @default(false)
 
   // ✅ FK must match Job.id (UUID)
   jobId String @db.Uuid
@@ -109,7 +118,7 @@ model SavedJob {
   // ✅ FK must match User.id (UUID)
   userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id])
-
+  isDeleted     Boolean  @default(false)
   // ✅ FK must match Job.id (UUID)
   jobId String @db.Uuid
   job   Job    @relation(fields: [jobId], references: [id])
@@ -120,7 +129,7 @@ model Notification {
   message   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
-
+    isDeleted     Boolean  @default(false)
   // ✅ FK must match User.id (UUID)
   userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id])
