@@ -135,6 +135,13 @@ model Notification {
   user   User   @relation(fields: [userId], references: [id])
 }
 
+model Blacklist {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  accessToken  String?  
+  refreshToken  String?  
+    
+}
+
 // -------------------------
 // Enums
 // -------------------------
