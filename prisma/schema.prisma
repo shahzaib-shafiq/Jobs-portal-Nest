@@ -25,7 +25,7 @@ model User {
   adress        String?        @db.VarChar(255)
   isDeleted     Boolean  @default(false)
   isVerified     Boolean  @default(true)
-  refreshToken  String?        @db.VarChar(255)
+  refreshToken  String?    
   phone         String?        @db.VarChar(12)
 
   createdAt     DateTime      @default(now())
@@ -63,6 +63,13 @@ model Job {
   location    String?
   jobType     JobType
   salary      Float?
+  comments    String?
+  industry    String?
+  skills      String[] 
+  year        Int?
+  budget      Float?
+
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
