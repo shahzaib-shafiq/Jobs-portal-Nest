@@ -15,13 +15,19 @@ generator client {
 // -------------------------
 model User {
   id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  firstName     String        @db.VarChar(100)
-  lastName      String        @db.VarChar(100)
-  email         String        @unique @db.VarChar(150)
+  firstName     String        @db.VarChar(50)
+  lastName      String        @db.VarChar(50)
+  email         String        @unique @db.VarChar(50)
   password      String        @db.VarChar(255)
   role          Role
   profileSummary String?      
   resumeUrl     String?
+  adress        String?        @db.VarChar(255)
+  isDeleted     Boolean  @default(false)
+  isVerified     Boolean  @default(true)
+  refreshToken  String?    
+  phone         String?        @db.VarChar(12)
+
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -42,7 +48,7 @@ model Company {
   logoUrl     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
+    isDeleted     Boolean  @default(false)
   // ✅ FK must match User.id (UUID)
   createdById String?  @db.Uuid
   createdBy   User?    @relation("CompanyCreatedBy", fields: [createdById], references: [id])
@@ -57,6 +63,13 @@ model Job {
   location    String?
   jobType     JobType
   salary      Float?
+  comments    String?
+  industry    String?
+  skills      String[] 
+  year        Int?
+  budget      Float?
+    isDeleted     Boolean  @default(false)
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -79,6 +92,15 @@ model Application {
   resumeUrl   String?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
+  type        String?
+  jobSource   String?
+  currentStatus String?
+  score         Float? 
+  comments      String?
+  gpa            Float?
+  skillSummary  String?
+  onHold        Boolean  @default(false)
+  isDeleted     Boolean  @default(false)
 
   // ✅ FK must match Job.id (UUID)
   jobId String @db.Uuid
@@ -96,7 +118,7 @@ model SavedJob {
   // ✅ FK must match User.id (UUID)
   userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id])
-
+  isDeleted     Boolean  @default(false)
   // ✅ FK must match Job.id (UUID)
   jobId String @db.Uuid
   job   Job    @relation(fields: [jobId], references: [id])
@@ -107,10 +129,17 @@ model Notification {
   message   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
-
+    isDeleted     Boolean  @default(false)
   // ✅ FK must match User.id (UUID)
   userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id])
+}
+
+model Blacklist {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  accessToken  String?  
+  refreshToken  String?  
+    
 }
 
 // -------------------------
