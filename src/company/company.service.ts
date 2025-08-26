@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException,ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
@@ -7,11 +7,29 @@ import { UpdateCompanyDto } from './dto/update-company.dto';
 export class CompanyService {
   constructor(private prisma: PrismaService) {}
 
+
   async create(createCompanyDto: CreateCompanyDto) {
-    return this.prisma.company.create({
-      data: createCompanyDto,
-    });
+  const { name,registrationId } = createCompanyDto;  // ✅ extract name
+
+  // Check if company already exists
+  const existingCompany = await this.prisma.company.findFirst({
+  where: {
+    AND: [
+      { name },
+      { registrationId }
+    ]
+  },
+});
+
+  if (existingCompany) {
+    throw new ConflictException('Company with this name or registrationId already exists');
   }
+
+  // Create new company
+  return this.prisma.company.create({
+    data: createCompanyDto,
+  });
+}
 
   async findAll() {
     return this.prisma.company.findMany({
