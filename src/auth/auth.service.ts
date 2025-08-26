@@ -97,51 +97,59 @@ async relogin(reloginDto: reLoginAuthDto) {
 
   try {
     try {
-      // ✅ Step 1: Verify if accessToken is valid
-
- const alreadyBlacklisted = await this.prisma.blacklist.findFirst({
-        where: { accessToken: accessToken },
+      // Step 1: Check if accessToken is blacklisted
+      const alreadyBlacklisted = await this.prisma.blacklist.findFirst({
+        where: { accessToken },
       });
+
       if (alreadyBlacklisted) {
-        throw new UnauthorizedException('Token is blacklisted/Already Expired');
+        throw new UnauthorizedException('Token is blacklisted/Already expired');
       }
+
+      // Step 2: Verify if accessToken is still valid
       const decoded = this.jwtService.verify(accessToken, {
         secret: process.env.JWT_ACCESS_SECRET,
       });
-
-      // If valid, return the same tokens
-      //
-      const payload = { sub: decoded.sub, email: decoded.email, role: decoded.role };
 
       return {
         accessToken,
         refreshToken,
         message: 'Access token still valid',
       };
-      
     } catch (error) {
       if (error.name !== 'TokenExpiredError') {
         throw new UnauthorizedException('Invalid access token');
       }
-     
-      // Token is expired → go to refresh
+      // else → expired, continue to refresh
     }
 
-    // ✅ Step 2: Verify refreshToken
-    
+    // Step 3: Verify refreshToken
     const refreshPayload = this.jwtService.verify(refreshToken, {
       secret: process.env.JWT_REFRESH_SECRET,
     });
 
-    // Build payload from refreshToken
-    
+    // Ensure refreshToken is still valid in DB
+    const user = await this.prisma.user.findUnique({
+      where: { id: refreshPayload.sub },
+    });
+
+    if (!user || !user.refreshToken) {
+      throw new UnauthorizedException('Refresh token not found');
+    }
+
+    // Compare refresh tokens (if you store hashed, use bcrypt.compare here)
+    if (user.refreshToken !== refreshToken) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    // Step 4: Build payload
     const payload = {
       sub: refreshPayload.sub,
       email: refreshPayload.email,
       role: refreshPayload.role,
     };
 
-    // ✅ Step 3: Generate new tokens
+    // Step 5: Generate new tokens
     const newAccessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
       expiresIn: '20m',
@@ -150,6 +158,17 @@ async relogin(reloginDto: reLoginAuthDto) {
     const newRefreshToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_REFRESH_SECRET,
       expiresIn: '7d',
+    });
+
+    // Step 6: Blacklist old accessToken
+    await this.prisma.blacklist.create({
+      data: { accessToken },
+    });
+
+    // Step 7: Store new refreshToken in DB
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken: newRefreshToken }, // ⚠️ Better: store hashed
     });
 
     return {
@@ -162,5 +181,6 @@ async relogin(reloginDto: reLoginAuthDto) {
     throw new UnauthorizedException('Relogin failed');
   }
 }
+
 
 }
