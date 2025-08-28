@@ -65,7 +65,7 @@ async create(createAuthDto: CreateAuthDto) {
     };
   }
 
-  //Login Function
+  //Logout Function
  async logout(logutDto: LogoutAuthDto) {
    try {
     const { accessToken, refreshToken } = logutDto;
@@ -168,8 +168,8 @@ async relogin(reloginDto: reLoginAuthDto) {
     // Step 7: Store new refreshToken in DB
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { refreshToken: newRefreshToken }, // ⚠️ Better: store hashed
-    });
+      data: { refreshToken: newRefreshToken }, 
+      });
 
     return {
       accessToken: newAccessToken,
